@@ -1,7 +1,10 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  // Sử dụng biến môi trường, nếu không có (khi chạy local) thì tự động dùng localhost:5000
+  baseURL: import.meta.env.VITE_API_URL
+    ? `${import.meta.env.VITE_API_URL}/api`
+    : "http://localhost:5000/api",
 });
 
 api.interceptors.request.use((config) => {
