@@ -7,7 +7,11 @@ function CourseCard({ course }) {
       className="block bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden"
     >
       <img
-        src={`http://localhost:5000${course.thumbnail}`}
+        src={
+          course.thumbnail?.startsWith("http")
+            ? course.thumbnail
+            : "https://placehold.co/600x400?text=NH7+Course"
+        }
         alt={course.title}
         className="w-full h-48 object-cover"
       />

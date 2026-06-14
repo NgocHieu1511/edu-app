@@ -6,7 +6,8 @@ export const createCourse = async (req, res) => {
   try {
     const course = await Course.create({
       ...req.body,
-      thumbnail: req.file ? `/uploads/${req.file.filename}` : "",
+      // 👉 SỬA TẠI ĐÂY: Thay `/uploads/${req.file.filename}` bằng `req.file.path`
+      thumbnail: req.file ? req.file.path : "",
     });
 
     res.status(201).json({
@@ -36,6 +37,7 @@ export const getCourses = async (req, res) => {
     });
   }
 };
+
 export const getCourseById = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
@@ -58,6 +60,7 @@ export const getCourseById = async (req, res) => {
     });
   }
 };
+
 export const updateCourse = async (req, res) => {
   try {
     const updateData = {
@@ -65,7 +68,8 @@ export const updateCourse = async (req, res) => {
     };
 
     if (req.file) {
-      updateData.thumbnail = `/uploads/${req.file.filename}`;
+      // 👉 SỬA TIẾP TẠI ĐÂY: Thay thành `req.file.path` khi cập nhật ảnh mới
+      updateData.thumbnail = req.file.path;
     }
 
     const course = await Course.findByIdAndUpdate(req.params.id, updateData, {
@@ -83,6 +87,7 @@ export const updateCourse = async (req, res) => {
     });
   }
 };
+
 export const deleteCourse = async (req, res) => {
   try {
     await Course.findByIdAndDelete(req.params.id);

@@ -15,7 +15,6 @@ function CourseDetailPage() {
   const handleEnroll = async () => {
     try {
       await enrollCourse(course._id);
-
       alert("Đăng ký khóa học thành công");
     } catch (error) {
       alert(error.response?.data?.message);
@@ -124,11 +123,8 @@ function CourseDetailPage() {
           <div>
             <div className="bg-white rounded-3xl shadow-lg border p-5 sticky top-24">
               <img
-                src={
-                  course.thumbnail
-                    ? `http://localhost:5000${course.thumbnail}`
-                    : "https://placehold.co/600x350"
-                }
+                // 👉 SỬA TẠI ĐÂY: Nhận trực tiếp link ảnh online hoặc ảnh placeholder dự phòng
+                src={course.thumbnail || "https://placehold.co/600x350"}
                 alt={course.title}
                 className="w-full h-52 object-cover rounded-2xl"
               />

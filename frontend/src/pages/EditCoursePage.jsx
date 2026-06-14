@@ -31,9 +31,15 @@ function EditCoursePage() {
           price: course.price,
         });
 
-        setPreview(
-          course.thumbnail ? `http://localhost:5000${course.thumbnail}` : "",
-        );
+        // 👉 SỬA TẠI ĐÂY: Sử dụng trực tiếp link ảnh từ database (vì đã là link Cloudinary)
+        // Nếu là ảnh cũ lưu dạng "/uploads/...", ta dùng ảnh placeholder hoặc giữ nguyên tùy bạn
+        if (course.thumbnail) {
+          setPreview(
+            course.thumbnail.startsWith("http")
+              ? course.thumbnail
+              : "https://placehold.co/600x400?text=NH7+Course",
+          );
+        }
       } catch (error) {
         console.log(error);
       }
@@ -54,7 +60,7 @@ function EditCoursePage() {
 
     if (file) {
       setThumbnail(file);
-      setPreview(URL.createObjectURL(file));
+      setPreview(URL.createObjectURL(file)); // Xem trước ảnh mới chọn từ máy tính local
     }
   };
 
@@ -71,16 +77,16 @@ function EditCoursePage() {
       data.append("price", formData.price);
 
       if (thumbnail) {
+        // 👉 SỬA TẠI ĐÂY: Đổi "thumbnail" thành "image" cho đồng bộ với Multer ở Backend
         data.append("thumbnail", thumbnail);
       }
 
       await updateCourse(id, data);
 
       alert("Cập nhật khóa học thành công");
-
       navigate("/admin/courses");
     } catch (error) {
-      alert(error.response?.data?.message);
+      alert(error.response?.data?.message || "Đã xảy ra lỗi khi cập nhật");
     }
   };
 
@@ -93,7 +99,7 @@ function EditCoursePage() {
           <img
             src={preview}
             alt="thumbnail"
-            className="w-full h-64 object-cover rounded-lg"
+            className="w-full h-64 object-cover rounded-lg border mb-2"
           />
         )}
 
@@ -109,6 +115,7 @@ function EditCoursePage() {
           value={formData.title}
           onChange={handleChange}
           className="w-full border p-3 rounded"
+          placeholder="Tên khóa học"
         />
 
         <textarea
@@ -116,6 +123,7 @@ function EditCoursePage() {
           value={formData.description}
           onChange={handleChange}
           className="w-full border p-3 rounded"
+          placeholder="Mô tả"
         />
 
         <input
@@ -123,6 +131,7 @@ function EditCoursePage() {
           value={formData.category}
           onChange={handleChange}
           className="w-full border p-3 rounded"
+          placeholder="Danh mục"
         />
 
         <input
@@ -130,6 +139,7 @@ function EditCoursePage() {
           value={formData.instructor}
           onChange={handleChange}
           className="w-full border p-3 rounded"
+          placeholder="Giảng viên"
         />
 
         <input
@@ -138,11 +148,12 @@ function EditCoursePage() {
           value={formData.price}
           onChange={handleChange}
           className="w-full border p-3 rounded"
+          placeholder="Giá"
         />
 
         <button
           type="submit"
-          className="bg-yellow-500 text-white px-6 py-3 rounded"
+          className="bg-yellow-500 hover:bg-yellow-600 font-medium text-white px-6 py-3 rounded transition"
         >
           Cập nhật
         </button>

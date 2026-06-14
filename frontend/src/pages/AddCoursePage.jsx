@@ -39,6 +39,7 @@ function AddCoursePage() {
       data.append("price", formData.price);
 
       if (thumbnail) {
+        // 👉 SỬA TẠI ĐÂY: Đổi tên key từ "thumbnail" thành "image" để khớp với Multer backend
         data.append("thumbnail", thumbnail);
       }
 
@@ -47,7 +48,7 @@ function AddCoursePage() {
       alert("Thêm khóa học thành công");
       navigate("/admin/courses");
     } catch (error) {
-      alert(error.response?.data?.message);
+      alert(error.response?.data?.message || "Đã xảy ra lỗi khi thêm khóa học");
     }
   };
 
@@ -61,6 +62,7 @@ function AddCoursePage() {
           placeholder="Tên khóa học"
           className="w-full border p-3 rounded"
           onChange={handleChange}
+          required // Nên thêm required để tránh gửi form rỗng
         />
 
         <textarea
@@ -100,7 +102,7 @@ function AddCoursePage() {
         />
 
         <button
-          className="bg-blue-600 text-white px-6 py-3 rounded"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded font-medium transition"
           type="submit"
         >
           Thêm khóa học
