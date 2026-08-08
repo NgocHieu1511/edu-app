@@ -152,9 +152,10 @@ function FeaturedCourses() {
     return filtered;
   }, [activeFilter, courses]);
 
-  useEffect(() => {
+  const handleFilterChange = (filterId) => {
+    setActiveFilter(filterId);
     setCurrentPage(1);
-  }, [activeFilter, courses]);
+  };
 
   // Pagination
   const indexOfLastCourse = currentPage * coursesPerPage;
@@ -164,16 +165,6 @@ function FeaturedCourses() {
     indexOfLastCourse,
   );
   const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
-
-  const scroll = (direction) => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = direction === "left" ? -300 : 300;
-      scrollContainerRef.current.scrollBy({
-        left: scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
 
   if (loading) {
     return (
@@ -262,7 +253,7 @@ function FeaturedCourses() {
           {filters.map((filter) => (
             <button
               key={filter.id}
-              onClick={() => setActiveFilter(filter.id)}
+              onClick={() => handleFilterChange(filter.id)}
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                 activeFilter === filter.id
                   ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"

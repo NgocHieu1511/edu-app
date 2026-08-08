@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getCourses, deleteCourse } from "../api/courseApi";
 import { Link } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
@@ -64,7 +64,7 @@ function AdminCoursesPage() {
     return filtered;
   }, [courses, searchTerm, selectedCategory, selectedStatus]);
 
-  const fetchCourses = async () => {
+  const fetchCourses = useCallback(async () => {
     try {
       setLoading(true);
       const res = await getCourses();
@@ -80,11 +80,17 @@ function AdminCoursesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchCourses();
-  }, []);
+    const timer = window.setTimeout(() => {
+      void fetchCourses();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [fetchCourses]);
 
   const handleDelete = async (id) => {
     setCourseToDelete(id);
