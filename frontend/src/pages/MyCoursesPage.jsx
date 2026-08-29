@@ -1,33 +1,32 @@
-import { useEffect, useState } from "react";
-
-import { getMyCourses } from "../api/enrollmentApi";
-
+import { useState } from "react";
+import { Plus, Minus, RotateCcw } from "lucide-react";
+import "../assets/css/BT1.css";
 function MyCoursesPage() {
-  const [courses, setCourses] = useState([]);
-
-  useEffect(() => {
-    const fetchCourses = async () => {
-      const res = await getMyCourses();
-
-      setCourses(res.data.enrollments);
-    };
-
-    fetchCourses();
-  }, []);
-  console.log(courses);
+  const [count, setCount] = useState(0);
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Lịch học của tôi</h1>
+      <div className="counter-card">
+        <h1>Counter</h1>
 
-      <div className="grid md:grid-cols-3 gap-6">
-        {courses.map((item) => (
-          <div key={item._id} className="bg-white shadow rounded-xl p-5">
-            <h3 className="font-bold">{item.courseId?.title}</h3>
+        <div className="count-display">{count}</div>
 
-            <p>{item.courseId?.description}</p>
-          </div>
-        ))}
+        <div className="button-group">
+          <button className="counter-btn" onClick={() => setCount(count - 1)}>
+            <Minus size={20} />
+            <span>Giảm</span>
+          </button>
+
+          <button className="counter-btn reset-btn" onClick={() => setCount(0)}>
+            <RotateCcw size={20} />
+            <span>Reset</span>
+          </button>
+
+          <button className="counter-btn" onClick={() => setCount(count + 1)}>
+            <Plus size={20} />
+            <span>Tăng</span>
+          </button>
+        </div>
       </div>
     </div>
   );

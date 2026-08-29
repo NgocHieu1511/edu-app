@@ -3,6 +3,7 @@ import express from "express";
 import {
   createLesson,
   getLessonsByCourse,
+  searchLessons,
   deleteLesson,
   getLessonById,
 } from "../controllers/lesson.controller.js";
@@ -14,6 +15,7 @@ const router = express.Router();
 
 router.post("/", protect, isAdmin, createLesson);
 
+router.get("/search", searchLessons);
 router.get("/course/:courseId", getLessonsByCourse);
 
 router.delete("/:id", protect, isAdmin, deleteLesson);

@@ -20,6 +20,7 @@ import {
   Bell,
   Filter,
   Eye,
+  Newspaper,
 } from "lucide-react";
 import api from "../api/axios";
 
@@ -220,6 +221,12 @@ function AdminDashboard() {
       label: "Thêm khóa học",
       link: "/admin/courses/add",
       color: "emerald",
+    },
+    {
+      icon: Newspaper,
+      label: "Quản lý Blog",
+      link: "/admin/blogs",
+      color: "blue",
     },
     {
       icon: Award,

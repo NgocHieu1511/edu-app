@@ -8,8 +8,15 @@ import enrollmentRoutes from "./routes/enrollment.route.js";
 import heroRoutes from "./routes/hero.route.js";
 import errorHandler from "./middleware/error.middleware.js";
 import adminRoutes from "./routes/admin.route.js";
+import blogRoutes from "./routes/blog.route.js";
 import path from "path";
+import { fileURLToPath } from "url";
 const app = express();
+const uploadsPath = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "uploads",
+);
 
 app.use(cors());
 app.use(express.json());
@@ -20,7 +27,8 @@ app.use("/api/lessons", lessonRoutes);
 app.use("/api/enrollments", enrollmentRoutes);
 app.use("/api/hero", heroRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/blogs", blogRoutes);
 app.use(errorHandler);
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(uploadsPath));
 
 export default app;

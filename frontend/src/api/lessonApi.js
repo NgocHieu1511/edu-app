@@ -14,3 +14,7 @@ export const deleteLesson = (id) => {
 export const getLessonById = (id) => {
   return api.get(`/lessons/${id}`);
 };
+
+export const searchLessons = (query) => {
+  return api.get("/lessons/search", { params: { q: query } });
+};

@@ -34,6 +34,34 @@ export const getLessonsByCourse = async (req, res) => {
   }
 };
 
+export const searchLessons = async (req, res) => {
+  try {
+    const query = req.query.q?.trim();
+
+    if (!query) {
+      return res.status(200).json({ success: true, lessons: [] });
+    }
+
+    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const lessons = await Lesson.find({
+      $or: [
+        { title: { $regex: escapedQuery, $options: "i" } },
+        { description: { $regex: escapedQuery, $options: "i" } },
+      ],
+    })
+      .populate("courseId", "title")
+      .limit(8)
+      .lean();
+
+    res.status(200).json({ success: true, lessons });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export const deleteLesson = async (req, res) => {
   try {
     await Lesson.findByIdAndDelete(req.params.id);

@@ -12,6 +12,11 @@ import EditCoursePage from "../pages/EditCoursePage";
 import AdminLessonsPage from "../pages/AdminLessonsPage";
 import AddLessonPage from "../pages/AddLessonPage";
 import LessonLearningPage from "../pages/LessonLearningPage";
+import BlogPage from "../pages/BlogPage";
+import BlogDetailPage from "../pages/BlogDetailPage";
+import AdminBlogsPage from "../pages/AdminBlogsPage";
+import BlogEditorPage from "../pages/BlogEditorPage";
+import AdminRoute from "../components/AdminRoute";
 
 function AppRoutes() {
   return (
@@ -21,10 +26,36 @@ function AppRoutes() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/courses/:id" element={<CourseDetailPage />} />
       <Route path="/my-courses" element={<MyCoursesPage />} />
+      <Route path="/blog" element={<BlogPage />} />
+      <Route path="/blog/:id" element={<BlogDetailPage />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
       <Route path="/admin/courses" element={<AdminCoursesPage />} />
       <Route path="/admin/courses/add" element={<AddCoursePage />} />
       <Route path="/admin/courses/edit/:id" element={<EditCoursePage />} />
+      <Route
+        path="/admin/blogs"
+        element={
+          <AdminRoute>
+            <AdminBlogsPage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/blogs/add"
+        element={
+          <AdminRoute>
+            <BlogEditorPage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/blogs/edit/:id"
+        element={
+          <AdminRoute>
+            <BlogEditorPage />
+          </AdminRoute>
+        }
+      />
       <Route
         path="/admin/courses/:courseId/lessons"
         element={<AdminLessonsPage />}

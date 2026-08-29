@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { searchLessons as searchLessonsApi } from "../api/lessonApi";
+import { searchBlogs } from "../api/blogApi";
 import {
   Home,
   BookOpen,
-  Calendar,
+  Newspaper,
   LogOut,
   LogIn,
   UserPlus,
@@ -12,6 +14,8 @@ import {
   ChevronDown,
   GraduationCap,
   LayoutDashboard,
+  Search,
+  Loader2,
 } from "lucide-react";
 import logo from "../assets/img/logo.png";
 
@@ -19,7 +23,12 @@ function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,6 +38,51 @@ function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const query = searchQuery.trim();
+
+    if (!query) {
+      return undefined;
+    }
+
+    let isCurrentRequest = true;
+    const timeoutId = setTimeout(async () => {
+      try {
+        setIsSearching(true);
+        const [lessonResponse, blogResponse] = await Promise.all([
+          searchLessonsApi(query),
+          searchBlogs(query),
+        ]);
+        if (isCurrentRequest) {
+          setSearchResults([
+            ...(lessonResponse.data.lessons || []).map((lesson) => ({
+              ...lesson,
+              resultType: "lesson",
+            })),
+            ...(blogResponse.data.blogs || []).map((blog) => ({
+              ...blog,
+              resultType: "blog",
+            })),
+          ]);
+        }
+      } catch (error) {
+        if (isCurrentRequest) {
+          setSearchResults([]);
+        }
+        console.error("Error searching lessons:", error);
+      } finally {
+        if (isCurrentRequest) {
+          setIsSearching(false);
+        }
+      }
+    }, 300);
+
+    return () => {
+      isCurrentRequest = false;
+      clearTimeout(timeoutId);
+    };
+  }, [searchQuery]);
+
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
   const user = JSON.parse(localStorage.getItem("user"));
@@ -37,7 +91,7 @@ function Navbar() {
     { to: "/", label: "Trang chủ", icon: Home },
     { to: "/courses", label: "Khóa học", icon: BookOpen },
     { to: "/my-courses", label: "Khóa học của tôi", icon: GraduationCap },
-    { to: "/schedule", label: "Lịch học", icon: Calendar },
+    { to: "/blog", label: "Blog", icon: Newspaper },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -46,6 +100,50 @@ function Navbar() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     window.location.reload();
+  };
+
+  const renderSearchResults = () => {
+    if (isSearching) {
+      return (
+        <div className="flex items-center gap-2 px-4 py-3 text-sm text-gray-500">
+          <Loader2 className="w-4 h-4 animate-spin" /> Đang tìm kiếm...
+        </div>
+      );
+    }
+
+    if (searchResults.length === 0) {
+      return (
+        <div className="px-4 py-3 text-sm text-gray-500">
+          Không tìm thấy bài học phù hợp.
+        </div>
+      );
+    }
+
+    return searchResults.map((result) => (
+      <button
+        key={`${result.resultType}-${result._id}`}
+        type="button"
+        onClick={() => {
+          setSearchQuery("");
+          setSearchResults([]);
+          setIsSearchOpen(false);
+          setIsMobileMenuOpen(false);
+          navigate(
+            result.resultType === "blog"
+              ? `/blog/${result._id}`
+              : `/learn/${result.courseId?._id}/${result._id}`,
+          );
+        }}
+        className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors"
+      >
+        <p className="font-semibold text-gray-800 truncate">{result.title}</p>
+        <p className="text-xs text-gray-500 truncate mt-0.5">
+          {result.resultType === "blog"
+            ? "Blog"
+            : result.courseId?.title || "Khóa học"}
+        </p>
+      </button>
+    ));
   };
 
   return (
@@ -57,7 +155,7 @@ function Navbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 md:h-20">
+        <div className="flex justify-between items-center gap-4 h-16 md:h-20">
           {/* Logo */}
           <Link
             to="/"
@@ -84,14 +182,14 @@ function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-2 xl:gap-3">
             {navLinks.map((link) => {
               const Icon = link.icon;
               return (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`group relative px-4 py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 ${
+                  className={`group relative whitespace-nowrap px-3 xl:px-4 py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 ${
                     isActive(link.to)
                       ? "text-blue-600 bg-blue-50/80"
                       : "text-gray-600 hover:text-blue-600 hover:bg-gray-50/80"
@@ -115,7 +213,7 @@ function Navbar() {
             {user?.role === "admin" && (
               <Link
                 to="/admin/dashboard"
-                className={`group relative px-4 py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 ${
+                className={`group relative whitespace-nowrap px-3 xl:px-4 py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 ${
                   isActive("/admin/dashboard")
                     ? "text-purple-600 bg-purple-50/80"
                     : "text-gray-600 hover:text-purple-600 hover:bg-gray-50/80"
@@ -135,13 +233,30 @@ function Navbar() {
               </Link>
             )}
 
+            <div className="relative ml-3 w-56 xl:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                onFocus={() => setIsSearchOpen(true)}
+                placeholder="Tìm bài học..."
+                aria-label="Tìm bài học"
+                className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50/70 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"
+              />
+              {isSearchOpen && searchQuery.trim() && (
+                <div className="absolute left-0 right-0 top-full mt-2 overflow-hidden rounded-xl bg-white shadow-xl border border-gray-100 z-50">
+                  {renderSearchResults()}
+                </div>
+              )}
+            </div>
+
             {/* User Section */}
-            <div className="ml-4 pl-4 border-l border-gray-200/60">
+            <div className="ml-3 pl-3 xl:ml-5 xl:pl-5 border-l border-gray-200/60">
               {user ? (
                 <div className="relative">
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50/80 transition-all duration-200 group"
+                    className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50/80 transition-all duration-200 group whitespace-nowrap"
                   >
                     <div className="w-9 h-9 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm shadow-md">
                       {user.name?.charAt(0).toUpperCase() || "U"}
@@ -218,6 +333,22 @@ function Navbar() {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 pb-6 border-t border-gray-200/60 space-y-1 animate-fadeIn">
+            <div className="relative px-1 pb-3">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                onFocus={() => setIsSearchOpen(true)}
+                placeholder="Tìm nhanh bài học..."
+                aria-label="Tìm nhanh bài học"
+                className="w-full pl-9 pr-3 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"
+              />
+              {isSearchOpen && searchQuery.trim() && (
+                <div className="mt-2 overflow-hidden rounded-xl bg-white shadow-lg border border-gray-100">
+                  {renderSearchResults()}
+                </div>
+              )}
+            </div>
             {navLinks.map((link) => {
               const Icon = link.icon;
               return (
