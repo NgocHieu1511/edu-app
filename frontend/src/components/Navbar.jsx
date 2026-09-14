@@ -16,6 +16,11 @@ import {
   LayoutDashboard,
   Search,
   Loader2,
+  Bell,
+  Gift,
+  MoreHorizontal,
+  Clapperboard,
+  CalendarCheck,
 } from "lucide-react";
 import logo from "../assets/img/logo.png";
 
@@ -27,8 +32,20 @@ function Navbar() {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [isReminderPanelOpen, setIsReminderPanelOpen] = useState(false);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [reminders, setReminders] = useState([]);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const readReminders = () => {
+    try {
+      const data = JSON.parse(localStorage.getItem("studyReminders") || "[]");
+      return Array.isArray(data) ? data : [];
+    } catch {
+      return [];
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -83,14 +100,50 @@ function Navbar() {
     };
   }, [searchQuery]);
 
+  useEffect(() => {
+    const syncReminders = () => setReminders(readReminders());
+    syncReminders();
+    window.addEventListener("study-reminders-updated", syncReminders);
+
+    return () => {
+      window.removeEventListener("study-reminders-updated", syncReminders);
+    };
+  }, []);
+
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
+  const formatReminderDate = (value) => {
+    if (!value) return "Chưa cập nhật";
+
+    const parsedDate = value.includes("T") ? new Date(value) : new Date(`${value}T00:00:00`);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "Chưa cập nhật";
+    }
+
+    return parsedDate.toLocaleString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const reminderCount = reminders.length;
 
   const navLinks = [
     { to: "/", label: "Trang chủ", icon: Home },
     { to: "/courses", label: "Khóa học", icon: BookOpen },
-    { to: "/my-courses", label: "Khóa học của tôi", icon: GraduationCap },
+  ];
+
+  const moreLinks = [
+    { to: "/my-courses", label: "Lời nhắc", icon: GraduationCap },
+    { to: "/rewards", label: "Phần thưởng", icon: Gift },
+    { to: "/attendance", label: "Chấm công", icon: CalendarCheck },
+    { to: "/shorts", label: "Shorts", icon: Clapperboard },
     { to: "/blog", label: "Blog", icon: Newspaper },
   ];
 
@@ -148,173 +201,245 @@ function Navbar() {
 
   return (
     <nav
-      className={`sticky top-0 z-50 transition-all duration-300 ${
+      className={`site-nav sticky top-0 z-50 transition-all duration-300 ${
         isScrolled
           ? "bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200/60"
           : "bg-white/80 backdrop-blur-sm border-b border-gray-200/30"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center gap-4 h-16 md:h-20">
-          {/* Logo */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-5 lg:px-7">
+        <div className="flex items-center justify-between gap-3 h-16 md:h-20">
           <Link
             to="/"
-            className="flex items-center gap-3 group transition-transform hover:scale-105"
+            className="flex min-w-0 flex-shrink-0 items-center gap-3 transition-transform hover:scale-[1.02]"
           >
-            <div className="relative">
-              <img
-                src={logo}
-                alt="NNH Academy Logo"
-                className="w-11 h-11 object-contain"
-              />
-              <div className="absolute -inset-1 bg-blue-600/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200">
+              <img src={logo} alt="NNH Academy Logo" className="h-8 w-8 object-contain" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-2xl font-extrabold tracking-tight">
-                <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  NHH Academy
-                </span>
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate text-lg font-extrabold tracking-tight site-logo-name sm:text-xl">
+                NNH Academy
               </span>
-              <span className="text-[10px] font-medium text-gray-500 tracking-wider uppercase">
+              <span className="hidden text-[9px] font-medium uppercase tracking-[0.18em] text-gray-500 sm:block">
                 Học tập không giới hạn
               </span>
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-2 xl:gap-3">
-            {navLinks.map((link) => {
-              const Icon = link.icon;
-              return (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className={`group relative whitespace-nowrap px-3 xl:px-4 py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 ${
-                    isActive(link.to)
-                      ? "text-blue-600 bg-blue-50/80"
-                      : "text-gray-600 hover:text-blue-600 hover:bg-gray-50/80"
+          <div className="hidden flex-1 items-center justify-center md:flex">
+            <div className="flex items-center gap-1 xl:gap-2">
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                return (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className={`group relative flex items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                      isActive(link.to)
+                        ? "bg-blue-50 text-blue-600"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-blue-600"
+                    }`}
+                  >
+                    <Icon
+                      className={`h-4 w-4 ${
+                        isActive(link.to)
+                          ? "text-blue-600"
+                          : "text-gray-400 group-hover:text-blue-600"
+                      }`}
+                    />
+                    {link.label}
+                  </Link>
+                );
+              })}
+
+              <div className="more-menu-wrap">
+                <button
+                  type="button"
+                  onClick={() => setIsMoreMenuOpen((prev) => !prev)}
+                  className={`group relative flex items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                    moreLinks.some((link) => isActive(link.to))
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-blue-600"
                   }`}
                 >
-                  <Icon
-                    className={`w-4 h-4 transition-transform group-hover:scale-110 ${
-                      isActive(link.to)
+                  <MoreHorizontal
+                    className={`h-4 w-4 ${
+                      moreLinks.some((link) => isActive(link.to))
                         ? "text-blue-600"
                         : "text-gray-400 group-hover:text-blue-600"
                     }`}
                   />
-                  {link.label}
-                  {isActive(link.to) && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-blue-600 rounded-full"></span>
-                  )}
-                </Link>
-              );
-            })}
+                  Xem thêm
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform duration-200 ${
+                      isMoreMenuOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
 
-            {user?.role === "admin" && (
-              <Link
-                to="/admin/dashboard"
-                className={`group relative whitespace-nowrap px-3 xl:px-4 py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 ${
-                  isActive("/admin/dashboard")
-                    ? "text-purple-600 bg-purple-50/80"
-                    : "text-gray-600 hover:text-purple-600 hover:bg-gray-50/80"
-                }`}
-              >
-                <LayoutDashboard
-                  className={`w-4 h-4 transition-transform group-hover:scale-110 ${
-                    isActive("/admin/dashboard")
-                      ? "text-purple-600"
-                      : "text-gray-400 group-hover:text-purple-600"
-                  }`}
-                />
-                Admin
-                {isActive("/admin/dashboard") && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-purple-600 rounded-full"></span>
+                {isMoreMenuOpen && (
+                  <div className="more-menu-panel">
+                    {moreLinks.map((link) => {
+                      const Icon = link.icon;
+                      return (
+                        <Link
+                          key={link.to}
+                          to={link.to}
+                          className={`more-menu-item ${isActive(link.to) ? "active" : ""}`}
+                          onClick={() => setIsMoreMenuOpen(false)}
+                        >
+                          <Icon className="h-4 w-4" />
+                          <span>{link.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 )}
-              </Link>
-            )}
+              </div>
 
-            <div className="relative ml-3 w-56 xl:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                onFocus={() => setIsSearchOpen(true)}
-                placeholder="Tìm bài học..."
-                aria-label="Tìm bài học"
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50/70 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"
-              />
-              {isSearchOpen && searchQuery.trim() && (
-                <div className="absolute left-0 right-0 top-full mt-2 overflow-hidden rounded-xl bg-white shadow-xl border border-gray-100 z-50">
-                  {renderSearchResults()}
-                </div>
+              {user?.role === "admin" && (
+                <Link
+                  to="/admin/dashboard"
+                  className={`group relative flex items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                    isActive("/admin/dashboard")
+                      ? "bg-purple-50 text-purple-600"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-purple-600"
+                  }`}
+                >
+                  <LayoutDashboard
+                    className={`h-4 w-4 ${
+                      isActive("/admin/dashboard")
+                        ? "text-purple-600"
+                        : "text-gray-400 group-hover:text-purple-600"
+                    }`}
+                  />
+                  Admin
+                </Link>
               )}
-            </div>
 
-            {/* User Section */}
-            <div className="ml-3 pl-3 xl:ml-5 xl:pl-5 border-l border-gray-200/60">
-              {user ? (
-                <div className="relative">
+              <div className="relative ml-2 w-52 xl:w-60">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  onFocus={() => setIsSearchOpen(true)}
+                  placeholder="Tìm bài học..."
+                  aria-label="Tìm bài học"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50/70 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400"
+                />
+                {isSearchOpen && searchQuery.trim() && (
+                  <div className="absolute left-0 right-0 top-full mt-2 overflow-hidden rounded-xl bg-white shadow-xl border border-gray-100 z-50">
+                    {renderSearchResults()}
+                  </div>
+                )}
+              </div>
+
+              <div className="ml-2 flex items-center gap-2 border-l border-gray-200/80 pl-2">
+                <div
+                  className="reminder-bell-wrap"
+                  onMouseEnter={() => setIsReminderPanelOpen(true)}
+                  onMouseLeave={() => setIsReminderPanelOpen(false)}
+                >
                   <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50/80 transition-all duration-200 group whitespace-nowrap"
+                    type="button"
+                    onClick={() => setIsReminderPanelOpen((prev) => !prev)}
+                    className="reminder-bell-button"
+                    aria-label="Danh sách lời nhắc"
                   >
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm shadow-md">
-                      {user.name?.charAt(0).toUpperCase() || "U"}
-                    </div>
-                    <div className="flex flex-col items-start">
-                      <span className="text-sm font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">
-                        {user.name}
-                      </span>
-                      <span className="text-xs text-gray-500 capitalize">
-                        {user.role || "Học viên"}
-                      </span>
-                    </div>
-                    <ChevronDown
-                      className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
-                        isDropdownOpen ? "rotate-180" : ""
-                      }`}
-                    />
+                    <Bell className="h-4 w-4" />
+                    {reminderCount > 0 && (
+                      <span className="reminder-bell-count">{reminderCount}</span>
+                    )}
                   </button>
 
-                  {/* Dropdown Menu */}
-                  {isDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100/80 py-2 animate-slideDown">
-                      <div className="px-4 py-3 border-b border-gray-100">
-                        <p className="text-sm font-semibold text-gray-700">
-                          {user.name}
-                        </p>
-                        <p className="text-xs text-gray-500">{user.email}</p>
+                  {isReminderPanelOpen && (
+                    <div className="reminder-panel">
+                      <div className="reminder-panel-header">
+                        <span>Lời nhắc</span>
+                        <strong>{reminderCount}</strong>
                       </div>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors text-sm font-medium"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        Đăng xuất
-                      </button>
+
+                      {reminders.length === 0 ? (
+                        <div className="reminder-panel-empty">Không có lời nhắc nào.</div>
+                      ) : (
+                        <div className="reminder-panel-list">
+                          {reminders.map((item) => (
+                            <div key={item.id} className="reminder-panel-item">
+                              <p>{item.lessonName}</p>
+                              <small>{formatReminderDate(item.dueDate)}</small>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Link
-                    to="/login"
-                    className="px-5 py-2.5 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50/50 transition-all duration-200 flex items-center gap-2"
-                  >
-                    <LogIn className="w-4 h-4" />
-                    Đăng nhập
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-md hover:shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 flex items-center gap-2"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    Đăng ký
-                  </Link>
-                </div>
-              )}
+
+                {user ? (
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      className="flex items-center gap-2 rounded-xl px-2.5 py-2 transition-all duration-200 hover:bg-gray-50"
+                    >
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-sm font-semibold text-white shadow-sm">
+                        {user.name?.charAt(0).toUpperCase() || "U"}
+                      </div>
+                      <div className="hidden min-w-0 flex-col items-start xl:flex">
+                        <span className="truncate text-sm font-semibold text-gray-700">
+                          {user.name}
+                        </span>
+                        <span className="text-[10px] capitalize text-gray-500">
+                          {user.role || "Học viên"}
+                        </span>
+                      </div>
+                      <ChevronDown
+                        className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
+                          isDropdownOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {isDropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-gray-100 bg-white py-2 shadow-xl animate-slideDown">
+                        <div className="border-b border-gray-100 px-4 py-3">
+                          <p className="text-sm font-semibold text-gray-700">{user.name}</p>
+                          <p className="text-xs text-gray-500">{user.email}</p>
+                        </div>
+                        <button
+                          onClick={handleLogout}
+                          className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Đăng xuất
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to="/login"
+                      className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 transition-all hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600"
+                    >
+                      <LogIn className="h-4 w-4" />
+                      Đăng nhập
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg"
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      Đăng ký
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
+
+          <Link to="/courses" className="site-nav-cta hidden sm:inline-flex">
+            Vào học ngay <span>→</span>
+          </Link>
 
           {/* Mobile Menu Button */}
           <button
@@ -367,6 +492,25 @@ function Navbar() {
                       isActive(link.to) ? "text-blue-600" : "text-gray-400"
                     }`}
                   />
+                  {link.label}
+                </Link>
+              );
+            })}
+
+            {moreLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={closeMobileMenu}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
+                    isActive(link.to)
+                      ? "text-blue-600 bg-blue-50/80"
+                      : "text-gray-700 hover:text-blue-600 hover:bg-gray-50/80"
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 ${isActive(link.to) ? "text-blue-600" : "text-gray-400"}`} />
                   {link.label}
                 </Link>
               );
@@ -438,7 +582,7 @@ function Navbar() {
         )}
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;
@@ -458,6 +602,37 @@ function Navbar() {
             opacity: 1;
             transform: translateY(0) scale(1);
           }
+        }
+        .more-menu-wrap {
+          position: relative;
+        }
+        .more-menu-panel {
+          position: absolute;
+          top: calc(100% + 12px);
+          right: 0;
+          min-width: 220px;
+          border: 1px solid #e5e7eb;
+          border-radius: 16px;
+          background: #fff;
+          box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+          padding: 8px;
+          z-index: 60;
+        }
+        .more-menu-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 10px 12px;
+          border-radius: 12px;
+          color: #374151;
+          font-size: 13px;
+          font-weight: 600;
+          transition: all 0.2s ease;
+        }
+        .more-menu-item:hover,
+        .more-menu-item.active {
+          background: #eef2ff;
+          color: #1d4ed8;
         }
         .animate-fadeIn {
           animation: fadeIn 0.25s ease-out;

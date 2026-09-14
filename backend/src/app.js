@@ -9,6 +9,7 @@ import heroRoutes from "./routes/hero.route.js";
 import errorHandler from "./middleware/error.middleware.js";
 import adminRoutes from "./routes/admin.route.js";
 import blogRoutes from "./routes/blog.route.js";
+import attendanceRoutes from "./routes/attendance.route.js";
 import path from "path";
 import { fileURLToPath } from "url";
 const app = express();
@@ -28,6 +29,7 @@ app.use("/api/enrollments", enrollmentRoutes);
 app.use("/api/hero", heroRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/blogs", blogRoutes);
+app.use("/api/attendance", attendanceRoutes);
 app.use(errorHandler);
 app.use("/uploads", express.static(uploadsPath));
 

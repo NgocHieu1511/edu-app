@@ -168,9 +168,9 @@ function CourseDetailPage() {
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="course-detail-page min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
         {/* Hero Section */}
-        <div className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 py-16">
+        <div className="course-detail-hero relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 py-16">
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
             <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>

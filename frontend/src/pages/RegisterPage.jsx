@@ -22,8 +22,14 @@ function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const payload = {
+      name: String(formData.name).trim(),
+      email: String(formData.email).trim().toLowerCase(),
+      password: String(formData.password).trim(),
+    };
+
     try {
-      const res = await register(formData);
+      const res = await register(payload);
 
       alert(res.data.message || "Đăng ký thành công");
 

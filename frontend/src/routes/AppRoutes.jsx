@@ -16,6 +16,9 @@ import BlogPage from "../pages/BlogPage";
 import BlogDetailPage from "../pages/BlogDetailPage";
 import AdminBlogsPage from "../pages/AdminBlogsPage";
 import BlogEditorPage from "../pages/BlogEditorPage";
+import PrizePage from "../pages/PrizePage";
+import ShortsPage from "../pages/ShortsPage";
+import AttendancePage from "../pages/AttendancePage";
 import AdminRoute from "../components/AdminRoute";
 
 function AppRoutes() {
@@ -26,6 +29,9 @@ function AppRoutes() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/courses/:id" element={<CourseDetailPage />} />
       <Route path="/my-courses" element={<MyCoursesPage />} />
+      <Route path="/rewards" element={<PrizePage />} />
+      <Route path="/shorts" element={<ShortsPage />} />
+      <Route path="/attendance" element={<AttendancePage />} />
       <Route path="/blog" element={<BlogPage />} />
       <Route path="/blog/:id" element={<BlogDetailPage />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />

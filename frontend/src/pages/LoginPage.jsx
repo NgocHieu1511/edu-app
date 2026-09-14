@@ -20,11 +20,15 @@ function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const payload = {
+      email: String(formData.email).trim().toLowerCase(),
+      password: String(formData.password).trim(),
+    };
+
     try {
-      const res = await login(formData);
+      const res = await login(payload);
 
       localStorage.setItem("token", res.data.token);
-
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
       alert("Đăng nhập thành công");

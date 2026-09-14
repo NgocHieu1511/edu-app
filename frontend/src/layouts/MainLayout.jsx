@@ -4,7 +4,7 @@ function MainLayout({ children }) {
   return (
     <>
       <Navbar />
-      <main className="max-w-6xl mx-auto p-5">{children}</main>
+      <main>{children}</main>
     </>
   );
 }

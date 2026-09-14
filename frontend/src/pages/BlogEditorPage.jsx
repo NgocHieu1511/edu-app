@@ -7,11 +7,13 @@ function BlogEditorPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = Boolean(id);
+  const currentUser = JSON.parse(localStorage.getItem("user") || "null");
+  const defaultAuthor = currentUser?.name || "NHH Academy";
   const [form, setForm] = useState({
     title: "",
     excerpt: "",
     content: "",
-    author: "NHH Academy",
+    author: defaultAuthor,
   });
   const [thumbnail, setThumbnail] = useState(null);
   const [preview, setPreview] = useState("");
@@ -26,7 +28,7 @@ function BlogEditorPage() {
           title: blog.title || "",
           excerpt: blog.excerpt || "",
           content: blog.content || "",
-          author: blog.author || "NHH Academy",
+          author: blog.author || defaultAuthor,
         });
         setPreview(blog.thumbnail || "");
       })

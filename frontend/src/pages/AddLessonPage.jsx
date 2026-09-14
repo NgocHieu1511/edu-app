@@ -29,6 +29,10 @@ function AddLessonPage() {
         courseId,
       });
 
+      const currentCount = Number(JSON.parse(localStorage.getItem("adminLessonCount") || "0"));
+      const nextCount = Number.isFinite(currentCount) ? currentCount + 1 : 1;
+      localStorage.setItem("adminLessonCount", JSON.stringify(nextCount));
+
       alert("Thêm bài học thành công");
 
       navigate(`/admin/courses/${courseId}/lessons`);
