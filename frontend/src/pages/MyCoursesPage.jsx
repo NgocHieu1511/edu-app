@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { CalendarClock, BellRing, Plus, Trash2 } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
 
@@ -8,7 +8,7 @@ const safeParseReminders = () => {
   try {
     const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
     return Array.isArray(data) ? data : [];
-  } catch (error) {
+  } catch {
     return [];
   }
 };
@@ -55,23 +55,19 @@ const formatCountdown = (dateValue) => {
 
 function MyCoursesPage() {
   const [form, setForm] = useState({ lessonName: "", dueDate: "" });
-  const [reminders, setReminders] = useState([]);
+  const [reminders, setReminders] = useState(safeParseReminders);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   const currentUser = useMemo(() => {
     try {
       return JSON.parse(localStorage.getItem("user") || "null");
-    } catch (error) {
+    } catch {
       return null;
     }
   }, []);
 
   const isAdmin = currentUser?.role === "admin";
-
-  useEffect(() => {
-    setReminders(safeParseReminders());
-  }, []);
 
   const persistReminders = (nextList) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(nextList));

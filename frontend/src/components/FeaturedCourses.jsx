@@ -10,6 +10,8 @@ import {
   Grid3x3,
   LayoutList,
 } from "lucide-react";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
 
 function FeaturedCourses() {
   const [courses, setCourses] = useState([]);
@@ -168,7 +170,7 @@ function FeaturedCourses() {
 
   if (loading) {
     return (
-      <section className="featured-courses py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <section className="featured-courses shadcn-featured py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
@@ -204,56 +206,53 @@ function FeaturedCourses() {
   }
 
   return (
-    <section className="featured-courses py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <section className="featured-courses shadcn-featured py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-10">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <Sparkles className="w-7 h-7 text-blue-600" />
-              <h2 className="text-3xl md:text-4xl font-extrabold text-gray-800 dark:text-white">
-                Khóa học nổi bật
-              </h2>
-            </div>
+            <Badge variant="subtle" className="shadcn-featured-kicker"><Sparkles size={13} /> HỌC ĐÚNG THỨ CẦN</Badge>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-800 dark:text-white">
+              Khóa học nổi bật
+            </h2>
             <p className="text-gray-600 dark:text-gray-400 text-lg">
-              Khám phá những khóa học chất lượng cao được yêu thích nhất
+              Những lộ trình được học viên chọn nhiều nhất trong tuần này.
             </p>
           </div>
 
           {/* View Controls */}
           <div className="flex items-center gap-3 mt-4 md:mt-0">
-            <div className="flex bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-1">
-              <button
+            <div className="shadcn-view-toggle flex bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-1">
+              <Button
+                type="button"
+                variant={viewMode === "grid" ? "default" : "ghost"}
+                size="icon"
                 onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-lg transition ${
-                  viewMode === "grid"
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                }`}
+                aria-label="Xem dạng lưới"
               >
                 <Grid3x3 className="w-4 h-4" />
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
+                variant={viewMode === "list" ? "default" : "ghost"}
+                size="icon"
                 onClick={() => setViewMode("list")}
-                className={`p-2 rounded-lg transition ${
-                  viewMode === "list"
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                }`}
+                aria-label="Xem dạng danh sách"
               >
                 <LayoutList className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap items-center gap-2 mb-8">
+        <div className="shadcn-filter-row flex flex-wrap items-center gap-2 mb-8">
           <Filter className="w-5 h-5 text-gray-400 mr-2" />
           {filters.map((filter) => (
             <button
               key={filter.id}
               onClick={() => handleFilterChange(filter.id)}
+              data-active={activeFilter === filter.id}
               className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                 activeFilter === filter.id
                   ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
@@ -263,9 +262,7 @@ function FeaturedCourses() {
               {filter.label}
             </button>
           ))}
-          <span className="ml-auto text-sm text-gray-500 dark:text-gray-400">
-            {filteredCourses.length} khóa học
-          </span>
+          <Badge variant="subtle" className="shadcn-course-count">{filteredCourses.length} khóa học</Badge>
         </div>
 
         {/* Courses Grid/List */}
@@ -282,11 +279,11 @@ function FeaturedCourses() {
         ) : (
           <div
             data-course-grid
-            className={
+            className={`shadcn-course-grid ${
               viewMode === "grid"
                 ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 : "space-y-4"
-            }
+            }`}
           >
             {currentCourses.map((course) => (
               <CourseCard
@@ -301,37 +298,42 @@ function FeaturedCourses() {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex justify-center items-center gap-2 mt-10">
-            <button
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              aria-label="Trang trước"
             >
               <ChevronLeft className="w-5 h-5" />
-            </button>
+            </Button>
 
             {[...Array(totalPages)].map((_, index) => (
-              <button
+              <Button
+                type="button"
+                variant={currentPage === index + 1 ? "default" : "ghost"}
+                size="icon"
                 key={index}
                 onClick={() => setCurrentPage(index + 1)}
-                className={`w-10 h-10 rounded-lg font-medium transition ${
-                  currentPage === index + 1
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
-                    : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
-                }`}
+                aria-label={`Trang ${index + 1}`}
               >
                 {index + 1}
-              </button>
+              </Button>
             ))}
 
-            <button
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
               disabled={currentPage === totalPages}
-              className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              aria-label="Trang sau"
             >
               <ChevronRight className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
         )}
 

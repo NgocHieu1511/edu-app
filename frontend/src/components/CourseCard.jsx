@@ -12,6 +12,7 @@ import {
   Eye,
 } from "lucide-react";
 import { useState } from "react";
+import { Badge } from "./ui/badge";
 
 function CourseCard({ course, viewMode = "grid" }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -66,7 +67,7 @@ function CourseCard({ course, viewMode = "grid" }) {
     return (
       <Link
         to={`/courses/${course._id}`}
-        className="course-card group block bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700"
+        className="course-card shadcn-course-card group block bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700"
       >
         <div className="flex flex-col md:flex-row">
           {/* Image */}
@@ -99,11 +100,9 @@ function CourseCard({ course, viewMode = "grid" }) {
               <h3 className="text-xl font-bold text-gray-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 {course.title}
               </h3>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold ${getLevelColor(course.level)}`}
-              >
+              <Badge className={`shadcn-level-badge ${getLevelColor(course.level)}`}>
                 {course.level || "Trung cấp"}
-              </span>
+              </Badge>
             </div>
 
             <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
@@ -133,12 +132,11 @@ function CourseCard({ course, viewMode = "grid" }) {
 
             <div className="mt-4 flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
               <div>
-                {course.originalPrice &&
-                  course.originalPrice > course.price && (
-                    <span className="text-sm text-gray-400 line-through mr-2">
-                      {formatPrice(course.originalPrice)}
-                    </span>
-                  )}
+                {course.originalPrice && course.originalPrice > course.price && (
+                  <span className="text-sm text-gray-400 line-through mr-2">
+                    {formatPrice(course.originalPrice)}
+                  </span>
+                )}
                 <span
                   className={`text-xl font-bold ${course.isFree ? "text-emerald-500" : "text-blue-600 dark:text-blue-400"}`}
                 >
@@ -162,7 +160,7 @@ function CourseCard({ course, viewMode = "grid" }) {
   return (
     <Link
       to={`/courses/${course._id}`}
-      className="course-card group block bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700 hover:-translate-y-1"
+      className="course-card shadcn-course-card group block bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700 hover:-translate-y-1"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -184,22 +182,22 @@ function CourseCard({ course, viewMode = "grid" }) {
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {course.isFree && (
-            <span className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-green-500 text-white text-xs font-semibold rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1">
+            <Badge className="shadcn-image-badge shadcn-free-badge">
               <Award className="w-3 h-3" />
               Miễn phí
-            </span>
+            </Badge>
           )}
           {course.isPopular && (
-            <span className="px-3 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-semibold rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1">
+            <Badge className="shadcn-image-badge shadcn-hot-badge">
               <Zap className="w-3 h-3" />
               Phổ biến
-            </span>
+            </Badge>
           )}
           {course.isNew && (
-            <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-semibold rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1">
+            <Badge className="shadcn-image-badge shadcn-new-badge">
               <Zap className="w-3 h-3" />
               Mới
-            </span>
+            </Badge>
           )}
         </div>
 
@@ -237,14 +235,12 @@ function CourseCard({ course, viewMode = "grid" }) {
       <div className="p-5">
         {/* Category and Level */}
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full">
+          <Badge className="shadcn-category-badge">
             {course.category || "Khóa học"}
-          </span>
-          <span
-            className={`text-xs font-semibold px-3 py-1 rounded-full ${getLevelColor(course.level)}`}
-          >
+          </Badge>
+          <Badge className={`shadcn-level-badge ${getLevelColor(course.level)}`}>
             {course.level || "Trung cấp"}
-          </span>
+          </Badge>
         </div>
 
         {/* Title */}

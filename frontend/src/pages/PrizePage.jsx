@@ -44,28 +44,26 @@ const readStoredValue = (key, fallback) => {
     const item = localStorage.getItem(key);
     if (item === null) return fallback;
     return JSON.parse(item);
-  } catch (error) {
+  } catch {
     return fallback;
   }
 };
 
 function PrizePage() {
-  const [lessonCount, setLessonCount] = useState(0);
-  const [rewards, setRewards] = useState([]);
-  const [claimedRewardIds, setClaimedRewardIds] = useState([]);
+  const [lessonCount] = useState(() => {
+    const count = Number(readStoredValue(LESSON_COUNT_KEY, 0) || 0);
+    return Number.isFinite(count) ? count : 0;
+  });
+  const [rewards, setRewards] = useState(() => {
+    const savedRewards = readStoredValue(PRIZE_KEY, defaultRewards);
+    return Array.isArray(savedRewards) && savedRewards.length > 0 ? savedRewards : defaultRewards;
+  });
+  const [claimedRewardIds, setClaimedRewardIds] = useState(() => {
+    const claimed = readStoredValue(CLAIMED_KEY, []);
+    return Array.isArray(claimed) ? claimed : [];
+  });
   const [selectedReward, setSelectedReward] = useState(null);
   const [form, setForm] = useState({ title: "", description: "", imageUrl: "" });
-
-  useEffect(() => {
-    const count = Number(readStoredValue(LESSON_COUNT_KEY, 0) || 0);
-    setLessonCount(Number.isFinite(count) ? count : 0);
-
-    const savedRewards = readStoredValue(PRIZE_KEY, defaultRewards);
-    setRewards(Array.isArray(savedRewards) && savedRewards.length > 0 ? savedRewards : defaultRewards);
-
-    const claimed = readStoredValue(CLAIMED_KEY, []);
-    setClaimedRewardIds(Array.isArray(claimed) ? claimed : []);
-  }, []);
 
   useEffect(() => {
     localStorage.setItem(PRIZE_KEY, JSON.stringify(rewards));

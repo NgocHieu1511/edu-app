@@ -1,30 +1,13 @@
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { ArrowRight, BookOpen, Code2, MessageCircle, Play, Trophy, Users, Zap } from "lucide-react";
+import { Link } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import FeaturedCourses from "../components/FeaturedCourses";
-import { ArrowRight, BookOpen, Code2, Play, Users, Zap, Trophy, MessageCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent } from "../components/ui/card";
 
 const STORAGE_KEY = "studyReminders";
-
-const formatDateText = (dateValue) => {
-  if (!dateValue) return "Chưa cập nhật";
-
-  const parsedDate = dateValue.includes("T")
-    ? new Date(dateValue)
-    : new Date(`${dateValue}T00:00:00`);
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return "Chưa cập nhật";
-  }
-
-  return parsedDate.toLocaleString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 function HomePage() {
   const [reminders, setReminders] = useState([]);
@@ -38,69 +21,55 @@ function HomePage() {
         setReminders([]);
       }
     };
-
     readReminders();
     window.addEventListener("study-reminders-updated", readReminders);
-
-    return () => {
-      window.removeEventListener("study-reminders-updated", readReminders);
-    };
+    return () => window.removeEventListener("study-reminders-updated", readReminders);
   }, []);
 
   return (
     <MainLayout>
-      <div className="home-app-notices">
-        <div className="notice-ticker">
-          {reminders.length > 0 ? (
-            reminders.map((item, index) => (
-              <Fragment key={item.id || `${item.lessonName}-${index}`}>
-                <span>HẠN: {formatDateText(item.dueDate)}</span>
-                <strong>{item.lessonName}</strong>
-                {index < reminders.length - 1 && <i />}
-              </Fragment>
-            ))
-          ) : (
-            <>
-              <span>5 PHÚT TRƯỚC</span>
-              <strong>Nguyễn Minh vừa đăng ký khóa học</strong>
-              <i />
-              <span>18 PHÚT TRƯỚC</span>
-              <strong>Phạm An vừa hoàn thành bài học</strong>
-            </>
-          )}
+      <div className="shadcn-home">
+        <div className="shadcn-home-notice">
+          <span><Zap size={14} /> HỌC TẬP TẬP TRUNG</span>
+          <strong>{reminders.length > 0 ? `${reminders.length} lời nhắc đang chờ bạn` : "Lộ trình mới: JavaScript thực chiến đã mở"}</strong>
+          <Link to="/my-courses">Xem tiến độ <ArrowRight size={14} /></Link>
         </div>
-        <div className="notice-promo">
-          <span className="promo-label"><Zap size={13} /> NHẮC NHỞ HỌC TẬP</span>
-          <strong>Hạn nộp bài mới đang tới</strong>
-          <span className="promo-copy">Đừng quên upload video bài học đúng thời hạn</span>
-          <Link to="/my-courses">Xem lời nhắc <ArrowRight size={15} /></Link>
-        </div>
+        <section className="shadcn-hero">
+          <div className="shadcn-shell shadcn-hero-grid">
+            <div className="shadcn-hero-copy">
+              <Badge variant="warm">NNH ACADEMY / 2026</Badge>
+              <h1>Học để tạo ra điều <span>có ích.</span></h1>
+              <p>Khóa học lập trình thực tế, ngắn gọn và có lộ trình. Mỗi ngày một bài học, mỗi tháng một sản phẩm mới.</p>
+              <div className="shadcn-hero-actions">
+                <Link to="/courses"><Button variant="accent" size="lg">Khám phá khóa học <ArrowRight size={18} /></Button></Link>
+                <Link to="/blog"><Button variant="outline" size="lg"><Play size={16} fill="currentColor" /> Xem cách học</Button></Link>
+              </div>
+              <div className="shadcn-trust"><div className="shadcn-avatar-stack"><span>H</span><span>M</span><span>T</span><span>+</span></div><span>Được tin chọn bởi <strong>5,000+</strong> học viên</span></div>
+            </div>
+            <Card className="shadcn-dashboard-card">
+              <CardContent>
+                <div className="shadcn-dashboard-top"><span><i /> BẢNG ĐIỀU KHIỂN</span><Badge>Đang học</Badge></div>
+                <div className="shadcn-dashboard-intro"><div><small>CHÀO BUỔI HỌC, MINH</small><h2>Tiếp tục hành trình</h2><p>Bạn đang đi đúng hướng. Giữ nhịp học hôm nay nhé.</p></div><div className="shadcn-progress-ring">68<small>%</small></div></div>
+                <div className="shadcn-current-course"><div className="shadcn-course-icon"><Code2 size={24} /></div><div><small>KHÓA HỌC TIẾP THEO</small><strong>JavaScript từ cơ bản đến nâng cao</strong><div className="shadcn-progress"><span /></div><em>12 / 24 bài học</em></div><ArrowRight size={18} /></div>
+                <div className="shadcn-dashboard-footer"><span><Trophy size={15} /> 7 ngày liên tục</span><span><MessageCircle size={15} /> Cộng đồng 24/7</span></div>
+              </CardContent>
+            </Card>
+          </div>
+          <div className="shadcn-shell shadcn-metrics"><div><strong>999+</strong><span>Bài giảng</span></div><div><strong>20+</strong><span>Khóa học</span></div><div><strong>10+</strong><span>Ngôn ngữ</span></div><div><strong>24/7</strong><span>Cộng đồng</span></div></div>
+        </section>
+        <section className="shadcn-path-section">
+          <div className="shadcn-shell">
+            <div className="shadcn-section-heading"><div><Badge variant="subtle">LỘ TRÌNH RÕ RÀNG</Badge><h2>Chọn điểm bắt đầu.</h2><p>Không cần biết tất cả. Chỉ cần bắt đầu đúng thứ tự.</p></div><Link to="/courses" className="shadcn-link">Xem tất cả <ArrowRight size={16} /></Link></div>
+            <div className="shadcn-path-grid">
+              <Link to="/courses"><Card className="shadcn-path-card shadcn-path-card-main"><CardContent><span className="shadcn-path-index">01 / NỀN TẢNG</span><Code2 size={28} /><h3>Bắt đầu với Web</h3><p>HTML, CSS và JavaScript để tự tay đưa ý tưởng lên màn hình.</p><span className="shadcn-tags"><small>HTML</small><small>CSS</small><small>JS</small></span></CardContent></Card></Link>
+              <Link to="/courses"><Card className="shadcn-path-card"><CardContent><span className="shadcn-path-index">02 / CHUYÊN SÂU</span><BookOpen size={28} /><h3>Chọn ngôn ngữ</h3><p>Python, Java, C++ và tư duy giải quyết vấn đề.</p><span className="shadcn-tags"><small>PYTHON</small><small>JAVA</small></span></CardContent></Card></Link>
+              <Link to="/courses"><Card className="shadcn-path-card"><CardContent><span className="shadcn-path-index">03 / XÂY DỰNG</span><Users size={28} /><h3>Làm dự án thật</h3><p>Backend, database và sản phẩm để đưa lên GitHub.</p><span className="shadcn-tags"><small>NODE</small><small>API</small></span></CardContent></Card></Link>
+            </div>
+          </div>
+        </section>
+        <FeaturedCourses />
+        <section className="shadcn-final-cta"><div className="shadcn-shell"><div><Badge variant="warm">MỖI NGÀY MỘT BƯỚC</Badge><h2>Hôm nay học gì<br /><span>để ngày mai giỏi hơn?</span></h2></div><Link to="/register"><Button size="lg">Tạo tài khoản miễn phí <ArrowRight size={18} /></Button></Link></div></section>
       </div>
-      <section className="home-hero app-hero">
-        <div className="home-shell home-hero-grid">
-          <div className="hero-copy">
-            <p className="eyebrow"><span className="eyebrow-dot" /> NỀN TẢNG HỌC LẬP TRÌNH</p>
-            <h1>Học code thật kỹ.<br /><em>Làm được thật.</em></h1>
-            <p className="hero-lead">Từ bài học đầu tiên đến dự án hoàn chỉnh. Học theo lộ trình rõ ràng, thực hành ngay và luôn có cộng đồng đồng hành.</p>
-            <div className="hero-actions"><Link to="/courses" className="button button-primary">Bắt đầu học miễn phí <ArrowRight size={17} /></Link><Link to="/blog" className="button button-quiet"><Play size={15} fill="currentColor" /> Xem cách học</Link></div>
-            <div className="hero-proof"><div className="avatar-stack"><span>H</span><span>N</span><span>T</span><span>+</span></div><span>Được chọn bởi hơn <strong>5,000</strong> học viên</span></div>
-          </div>
-          <div className="learning-preview" aria-label="Tổng quan tiến độ học tập">
-            <div className="preview-top"><span><i /> NNH ACADEMY</span><small>Học tập của tôi</small></div>
-            <div className="preview-welcome"><div><small>CHÀO BUỔI HỌC, HỌC VIÊN</small><h3>Tiếp tục hành trình của bạn</h3></div><div className="progress-ring">68<span>%</span></div></div>
-            <div className="preview-course"><div className="course-icon"><Code2 size={23} /></div><div><small>ĐANG HỌC</small><strong>JavaScript từ cơ bản đến nâng cao</strong><div className="mini-progress"><span /></div><em>12 / 24 bài học</em></div><ArrowRight size={18} /></div>
-            <div className="preview-bottom"><span><Trophy size={15} /> 7 ngày học liên tục</span><span><MessageCircle size={15} /> 24/7 cộng đồng</span></div>
-          </div>
-        </div>
-        <div className="home-shell stats-strip"><div><strong>999+</strong><span>Bài giảng</span></div><div><strong>20+</strong><span>Khóa học</span></div><div><strong>10+</strong><span>Ngôn ngữ</span></div><div><strong>24/7</strong><span>Cộng đồng Discord</span></div></div>
-      </section>
-      <section className="home-section path-section"><div className="home-shell"><div className="section-heading"><div><p className="eyebrow">BẮT ĐẦU TỪ ĐÂY</p><h2>Chọn hướng đi của bạn</h2></div><Link to="/courses" className="text-link">Xem tất cả khóa học <ArrowRight size={16} /></Link></div><div className="path-grid">
-        <Link to="/courses" className="path-card path-card-featured"><span className="path-number">01</span><Code2 size={28} /><h3>Bắt đầu với Web</h3><p>HTML, CSS, JavaScript nền tảng. Hiểu cách trang web hoạt động và làm sản phẩm đầu tay.</p><span className="tag-row"><small>HTML</small><small>CSS</small><small>JS</small></span></Link>
-        <Link to="/courses" className="path-card"><span className="path-number">02</span><BookOpen size={25} /><h3>Chọn ngôn ngữ chuyên sâu</h3><p>Python cho data, Java cho doanh nghiệp, C++ cho thuật toán.</p><span className="tag-row"><small>Python</small><small>Java</small><small>C++</small></span></Link>
-        <Link to="/courses" className="path-card"><span className="path-number">03</span><Users size={25} /><h3>Backend & dự án thật</h3><p>REST API, database và sản phẩm hoàn chỉnh để đưa lên GitHub.</p><span className="tag-row"><small>Node</small><small>API</small><small>GitHub</small></span></Link>
-      </div></div></section>
-      <FeaturedCourses />
-      <section className="home-cta"><div className="home-shell cta-inner"><div><p className="eyebrow">HỌC ĐỀU, TIẾN XA</p><h2>Một bài hôm nay.<br /><em>Một kỹ năng cho ngày mai.</em></h2></div><Link to="/register" className="button button-light">Tạo tài khoản miễn phí <ArrowRight size={17} /></Link></div></section>
     </MainLayout>
   );
 }

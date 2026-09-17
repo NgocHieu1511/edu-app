@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Server,
@@ -22,7 +22,7 @@ function CategorySection() {
   const [setHoveredCategory] = useState(null);
 
   // Category data with icons and stats
-  const categoryData = [
+  const categoryData = useMemo(() => [
     {
       id: "frontend",
       name: "Frontend",
@@ -113,7 +113,7 @@ function CategorySection() {
       iconBg: "bg-amber-100 dark:bg-amber-900/30",
       iconColor: "text-amber-600 dark:text-amber-400",
     },
-  ];
+  ], []);
 
   useEffect(() => {
     // Simulate API call
@@ -136,7 +136,7 @@ function CategorySection() {
     };
 
     fetchCategories();
-  }, []);
+  }, [categoryData]);
 
   // Get color classes
   const getColorClasses = (color) => {

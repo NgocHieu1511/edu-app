@@ -136,7 +136,7 @@ function Navbar() {
 
   const navLinks = [
     { to: "/", label: "Trang chủ", icon: Home },
-    { to: "/courses", label: "Khóa học", icon: BookOpen },
+    { to: "/roadmap", label: "Lộ trình", icon: BookOpen },
   ];
 
   const moreLinks = [
@@ -437,8 +437,8 @@ function Navbar() {
             </div>
           </div>
 
-          <Link to="/courses" className="site-nav-cta hidden sm:inline-flex">
-            Vào học ngay <span>→</span>
+          <Link to="/roadmap" className="site-nav-cta hidden sm:inline-flex">
+            Xem lộ trình <span>→</span>
           </Link>
 
           {/* Mobile Menu Button */}

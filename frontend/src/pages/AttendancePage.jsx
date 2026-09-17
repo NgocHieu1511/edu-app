@@ -24,19 +24,6 @@ const todayString = () => {
   return `${year}-${month}-${day}`;
 };
 
-const formatDate = (value) => {
-  if (!value) return "Chưa có";
-
-  const date = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return value;
-
-  return date.toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-};
-
 const getMonthLabel = (date) =>
   date.toLocaleDateString("vi-VN", {
     month: "long",
@@ -45,7 +32,6 @@ const getMonthLabel = (date) =>
 
 const getCalendarDays = (date) => {
   const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
   const startDay = new Date(firstDay);
   startDay.setDate(startDay.getDate() - firstDay.getDay());
 
@@ -61,7 +47,13 @@ const getCalendarDays = (date) => {
 
 function AttendancePage() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const [user] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "null");
+    } catch {
+      return null;
+    }
+  });
   const [summary, setSummary] = useState({
     streak: 0,
     totalDays: 0,
@@ -76,10 +68,7 @@ function AttendancePage() {
   const [calendarMonth, setCalendarMonth] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
 
   useEffect(() => {
-    const currentUser = JSON.parse(localStorage.getItem("user") || "null");
-    setUser(currentUser);
-
-    if (!currentUser) {
+    if (!user) {
       navigate("/login");
       return;
     }
@@ -110,7 +99,7 @@ function AttendancePage() {
     };
 
     fetchData();
-  }, [navigate]);
+  }, [navigate, user]);
 
   const checkedInToday = useMemo(() => {
     return summary.checkedInToday || records.some((item) => item.date === todayString());

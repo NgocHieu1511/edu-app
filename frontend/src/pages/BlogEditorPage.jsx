@@ -35,7 +35,7 @@ function BlogEditorPage() {
       .catch(() => window.alert("Không thể tải bài viết."))
       .finally(() => setLoading(false));
     return undefined;
-  }, [id, isEditing]);
+  }, [defaultAuthor, id, isEditing]);
 
   const handleChange = (event) =>
     setForm({ ...form, [event.target.name]: event.target.value });

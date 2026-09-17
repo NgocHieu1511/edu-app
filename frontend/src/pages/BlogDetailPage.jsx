@@ -51,7 +51,7 @@ function BlogDetailPage() {
         )}
         <p className="flex items-center gap-2 text-sm text-gray-400">
           <Calendar className="h-4 w-4" />
-          {new Date(blog.createdAt || Date.now()).toLocaleDateString("vi-VN")} · {blog.author || "Người dùng"}
+          {blog.createdAt ? new Date(blog.createdAt).toLocaleDateString("vi-VN") : "Chưa cập nhật"} · {blog.author || "Người dùng"}
         </p>
         <h1 className="mt-4 text-3xl font-bold leading-tight text-gray-900 sm:text-5xl">
           {blog.title}

@@ -25,6 +25,9 @@ import {
   Loader2,
   Check,
 } from "lucide-react";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card } from "../components/ui/card";
 
 function LessonLearningPage() {
   const { courseId, lessonId } = useParams();
@@ -193,19 +196,21 @@ function LessonLearningPage() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex flex-col">
+    return (
+      <div className="lesson-shadcn min-h-screen flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border-b border-gray-200/60 dark:border-gray-700/60 shadow-sm">
+      <header className="lesson-shadcn-header sticky top-0 z-50">
         <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
           <div className="flex items-center gap-3">
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => navigate(-1)}
               className="p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
               aria-label="Quay lại"
             >
               <ArrowLeft className="w-5 h-5" />
-            </button>
+            </Button>
 
             <div className="hidden sm:block h-6 w-px bg-gray-200 dark:bg-gray-700"></div>
 
@@ -216,7 +221,9 @@ function LessonLearningPage() {
               </span>
             </div>
 
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={toggleSidebar}
               className="lg:hidden p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
             >
@@ -225,7 +232,7 @@ function LessonLearningPage() {
               ) : (
                 <Menu className="w-5 h-5" />
               )}
-            </button>
+            </Button>
           </div>
 
           <div className="flex items-center gap-2">
@@ -244,7 +251,7 @@ function LessonLearningPage() {
 
             <Link
               to={`/courses/${courseId}`}
-              className="px-4 py-2 text-sm font-medium rounded-xl bg-blue-600 text-white shadow-sm hover:bg-blue-700 hover:shadow-md transition-all duration-200 flex items-center gap-2"
+              className="lesson-course-link"
             >
               <BookOpen className="w-4 h-4" />
               <span className="hidden sm:inline">Khóa học</span>
@@ -270,10 +277,10 @@ function LessonLearningPage() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Video/Content Area */}
-        <div className="flex-1 flex flex-col overflow-y-auto">
+        <div className="lesson-shadcn-main flex-1 flex flex-col overflow-y-auto">
           {/* Video Player */}
-          <div className="w-full bg-black/5 dark:bg-black/20 border-b border-gray-200 dark:border-gray-700">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-6 lg:py-8">
+          <div className="lesson-video-section w-full">
+            <div className="lesson-video-shell max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-6 lg:py-8">
               <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-black aspect-video">
                 {embedUrl ? (
                   <iframe
@@ -338,14 +345,14 @@ function LessonLearningPage() {
 
           {/* Lesson Info */}
           <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 lg:py-8">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 md:p-8">
+            <Card className="lesson-info-panel p-6 md:p-8">
               {/* Header */}
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-semibold">
+                    <Badge>
                       Bài {currentIndex + 1} / {totalLessons}
-                    </span>
+                    </Badge>
                     {lesson.type && (
                       <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full text-xs font-semibold flex items-center gap-1">
                         {(() => {
@@ -372,7 +379,9 @@ function LessonLearningPage() {
                     </p>
                   )}
                 </div>
-                <button
+                <Button
+                  variant={isCompleted ? "accent" : "outline"}
+                  size="sm"
                   onClick={markAsCompleted}
                   className={`flex-shrink-0 px-4 py-2 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 ${
                     isCompleted
@@ -391,7 +400,7 @@ function LessonLearningPage() {
                       Đánh dấu hoàn thành
                     </>
                   )}
-                </button>
+                </Button>
               </div>
 
               {/* Description */}
@@ -495,12 +504,13 @@ function LessonLearningPage() {
                   </div>
                 </div>
               )}
-            </div>
+            </Card>
           </div>
         </div>
 
         {/* Sidebar - Lesson List */}
         <div
+          data-lesson-sidebar
           className={`${
             isSidebarOpen ? "block" : "hidden"
           } lg:block w-full lg:w-96 bg-white dark:bg-gray-800 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden lg:sticky lg:top-16 lg:self-start max-h-[calc(100vh-4rem)]`}
