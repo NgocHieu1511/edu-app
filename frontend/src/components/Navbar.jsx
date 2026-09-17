@@ -21,6 +21,7 @@ import {
   MoreHorizontal,
   Clapperboard,
   CalendarCheck,
+  ChartNoAxesColumnIncreasing,
 } from "lucide-react";
 import logo from "../assets/img/logo.png";
 
@@ -137,6 +138,7 @@ function Navbar() {
   const navLinks = [
     { to: "/", label: "Trang chủ", icon: Home },
     { to: "/roadmap", label: "Lộ trình", icon: BookOpen },
+    { to: "/progress", label: "Tiến độ", icon: ChartNoAxesColumnIncreasing },
   ];
 
   const moreLinks = [
