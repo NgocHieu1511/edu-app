@@ -1,16 +1,11 @@
-import { useMemo, useState } from "react";
-import { BookOpen, CheckCircle2, Clock3, Plus, Target, Trash2 } from "lucide-react";
-
-const STORAGE_KEY = "studyProgress";
-
-const readProgress = (userId) => {
-  try {
-    const data = JSON.parse(localStorage.getItem(`${STORAGE_KEY}:${userId}`) || "[]");
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
-};
+import { useEffect, useMemo, useState } from "react";
+import { BookOpen, CheckCircle2, Clock3, Loader2, Plus, Target, Trash2 } from "lucide-react";
+import {
+  addStudiedMinutes as addStudiedMinutesApi,
+  createProgress,
+  deleteProgress,
+  getMyProgress,
+} from "../api/progressApi";
 
 /* ---------- Progress ring (SVG + Tailwind) ---------- */
 function ProgressRing({
@@ -78,19 +73,39 @@ function StatCard({ icon: Icon, label, value, accent = "indigo" }) {
 
 /* ---------- Page ---------- */
 function ProgressPage() {
-  const userId = JSON.parse(localStorage.getItem("user") || "null")?.id || "guest";
-  const [items, setItems] = useState(() => readProgress(userId));
+  const [items, setItems] = useState([]);
   const [title, setTitle] = useState("");
   const [plannedMinutes, setPlannedMinutes] = useState(30);
   const [goalImage, setGoalImage] = useState("");
   const [message, setMessage] = useState("");
   const [activeItemId, setActiveItemId] = useState(null);
   const [additionalMinutes, setAdditionalMinutes] = useState(30);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [updatingItemId, setUpdatingItemId] = useState(null);
+  const [deletingItemId, setDeletingItemId] = useState(null);
 
-  const saveItems = (nextItems) => {
-    setItems(nextItems);
-    localStorage.setItem(`${STORAGE_KEY}:${userId}`, JSON.stringify(nextItems));
-  };
+  useEffect(() => {
+    let isMounted = true;
+
+    getMyProgress()
+      .then(({ data }) => {
+        if (isMounted) {
+          setItems(data.items || []);
+        }
+      }).catch((error) => {
+        if (isMounted) {
+          setLoadError(error.response?.data?.message || "Không thể tải tiến độ học tập từ cơ sở dữ liệu.");
+        }
+      }).finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const summary = useMemo(() => {
     const planned = items.reduce((total, item) => total + item.plannedMinutes, 0);
@@ -119,7 +134,7 @@ function ProgressPage() {
     event.target.value = "";
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const cleanTitle = title.trim();
     const minutes = Number(plannedMinutes);
@@ -129,38 +144,61 @@ function ProgressPage() {
       return;
     }
 
-    saveItems([
-      ...items,
-      {
-        id: crypto.randomUUID(),
+    try {
+      setSaving(true);
+      setMessage("");
+      const { data } = await createProgress({
         title: cleanTitle,
         plannedMinutes: Math.round(minutes),
-        studiedMinutes: 0,
         imageUrl: goalImage || "",
-      },
-    ]);
-    setTitle("");
-    setPlannedMinutes(30);
-    setGoalImage("");
-    setMessage("Đã thêm nội dung học.");
+      });
+      setItems((currentItems) => [data.item, ...currentItems]);
+      setTitle("");
+      setPlannedMinutes(30);
+      setGoalImage("");
+      setMessage("Đã lưu nội dung học vào cơ sở dữ liệu.");
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Không thể lưu nội dung học vào cơ sở dữ liệu.");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const addStudiedMinutes = (id) => {
+  const addStudiedMinutes = async (id) => {
     const minutes = Number(additionalMinutes);
 
     if (!Number.isFinite(minutes) || minutes < 1) {
       return;
     }
 
-    saveItems(
-      items.map((item) =>
-        item.id === id
-          ? { ...item, studiedMinutes: item.studiedMinutes + Math.round(minutes) }
-          : item,
-      ),
-    );
-    setActiveItemId(null);
-    setAdditionalMinutes(30);
+    try {
+      setUpdatingItemId(id);
+      setMessage("");
+      const { data } = await addStudiedMinutesApi(id, Math.round(minutes));
+      setItems((currentItems) =>
+        currentItems.map((item) => (item._id === id ? data.item : item)),
+      );
+      setActiveItemId(null);
+      setAdditionalMinutes(30);
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Không thể lưu thời gian học vào cơ sở dữ liệu.");
+    } finally {
+      setUpdatingItemId(null);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      setDeletingItemId(id);
+      setMessage("");
+      await deleteProgress(id);
+      setItems((currentItems) => currentItems.filter((item) => item._id !== id));
+      setMessage("Đã xóa nội dung học.");
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Không thể xóa nội dung học khỏi cơ sở dữ liệu.");
+    } finally {
+      setDeletingItemId(null);
+    }
   };
 
   const inputClass =
@@ -297,9 +335,11 @@ function ProgressPage() {
 
             <button
               type="submit"
+              disabled={saving || loading}
               className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:from-indigo-500 hover:to-violet-500 active:scale-[0.98]"
             >
-              <Plus className="h-4 w-4" /> Thêm mục tiêu
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              {saving ? "Đang lưu vào cơ sở dữ liệu..." : "Thêm mục tiêu"}
             </button>
           </form>
 
@@ -313,11 +353,20 @@ function ProgressPage() {
                 <h2 className="text-lg font-semibold text-slate-800">Nội dung của bạn</h2>
               </div>
               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                {items.length} mục
+                {loading ? "Đang tải..." : `${items.length} mục`}
               </span>
             </div>
 
-            {items.length === 0 ? (
+              {loading ? (
+                <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50/60 px-6 py-14 text-sm text-slate-500">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Đang tải dữ liệu từ cơ sở dữ liệu...
+                </div>
+              ) : loadError ? (
+                <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-6 py-8 text-center text-sm text-rose-700">
+                  Không thể tải dữ liệu đã lưu: {loadError}
+                </div>
+              ) : items.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-14 text-center">
                 <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-indigo-500 shadow-sm">
                   <BookOpen className="h-6 w-6" />
@@ -334,12 +383,12 @@ function ProgressPage() {
                     100,
                     Math.round((item.studiedMinutes / item.plannedMinutes) * 100),
                   );
-                  const isActive = activeItemId === item.id;
+                  const isActive = activeItemId === item._id;
                   const isDone = percentage >= 100;
 
                   return (
                     <article
-                      key={item.id}
+                      key={item._id}
                       className={`rounded-2xl border p-4 transition ${
                         isActive
                           ? "border-indigo-200 bg-indigo-50/40 shadow-sm"
@@ -365,13 +414,14 @@ function ProgressPage() {
                               </h3>
                               <button
                                 type="button"
-                                onClick={() =>
-                                  saveItems(items.filter((entry) => entry.id !== item.id))
-                                }
+                                onClick={() => handleDelete(item._id)}
+                                disabled={deletingItemId === item._id}
                                 aria-label={`Xóa ${item.title}`}
                                 className="shrink-0 rounded-lg p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-500"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                {deletingItemId === item._id
+                                  ? <Loader2 className="h-4 w-4 animate-spin" />
+                                  : <Trash2 className="h-4 w-4" />}
                               </button>
                             </div>
 
@@ -396,8 +446,9 @@ function ProgressPage() {
 
                             <button
                               type="button"
+                              disabled={Boolean(updatingItemId)}
                               onClick={() => {
-                                setActiveItemId(isActive ? null : item.id);
+                                setActiveItemId(isActive ? null : item._id);
                                 setAdditionalMinutes(30);
                               }}
                               className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-100"
@@ -409,7 +460,7 @@ function ProgressPage() {
                               <form
                                 onSubmit={(event) => {
                                   event.preventDefault();
-                                  addStudiedMinutes(item.id);
+                                  addStudiedMinutes(item._id);
                                 }}
                                 className="mt-3 flex items-end gap-2 rounded-xl border border-indigo-100 bg-white p-3"
                               >
@@ -430,9 +481,10 @@ function ProgressPage() {
                                 </label>
                                 <button
                                   type="submit"
+                                  disabled={updatingItemId === item._id}
                                   className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500 active:scale-95"
                                 >
-                                  Lưu
+                                  {updatingItemId === item._id ? "Đang lưu..." : "Lưu"}
                                 </button>
                               </form>
                             )}

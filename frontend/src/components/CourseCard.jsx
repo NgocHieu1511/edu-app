@@ -17,6 +17,7 @@ import { Badge } from "./ui/badge";
 function CourseCard({ course, viewMode = "grid" }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const lessonCount = course.lessonCount ?? course.lessons ?? 0;
 
   // Format price
   const formatPrice = (price) => {
@@ -120,7 +121,7 @@ function CourseCard({ course, viewMode = "grid" }) {
               </div>
               <div className="flex items-center gap-1.5">
                 <BookOpen className="w-4 h-4" />
-                <span>{course.lessons || 0} bài học</span>
+                <span>{lessonCount} bài học</span>
               </div>
               <div className="flex items-center gap-1">
                 <Star className="w-4 h-4 text-yellow-400 fill-current" />
@@ -283,7 +284,7 @@ function CourseCard({ course, viewMode = "grid" }) {
           </div>
           <div className="flex items-center gap-1.5">
             <BookOpen className="w-4 h-4" />
-            <span>{course.lessons || 0}</span>
+            <span>{lessonCount} bài học</span>
           </div>
         </div>
 

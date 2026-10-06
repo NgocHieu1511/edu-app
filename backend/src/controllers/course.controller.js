@@ -1,4 +1,5 @@
 import Course from "../models/course.model.js";
+import Lesson from "../models/lesson.model.js";
 
 export const createCourse = async (req, res) => {
   console.log(req.body);
@@ -24,11 +25,28 @@ export const createCourse = async (req, res) => {
 
 export const getCourses = async (req, res) => {
   try {
-    const courses = await Course.find();
+    const [courses, lessonCounts] = await Promise.all([
+      Course.find().lean(),
+      Lesson.aggregate([
+        {
+          $group: {
+            _id: "$courseId",
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+    ]);
+    const lessonCountByCourseId = new Map(
+      lessonCounts.map(({ _id, count }) => [_id.toString(), count]),
+    );
+    const coursesWithLessonCounts = courses.map((course) => ({
+      ...course,
+      lessonCount: lessonCountByCourseId.get(course._id.toString()) || 0,
+    }));
 
     res.status(200).json({
       success: true,
-      courses,
+      courses: coursesWithLessonCounts,
     });
   } catch (error) {
     res.status(500).json({

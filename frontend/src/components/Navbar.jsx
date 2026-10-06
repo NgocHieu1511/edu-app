@@ -4,7 +4,7 @@ import { searchLessons as searchLessonsApi } from "../api/lessonApi";
 import { searchBlogs } from "../api/blogApi";
 import {
   Home,
-  BookOpen,
+  CalendarDays,
   Newspaper,
   LogOut,
   LogIn,
@@ -137,7 +137,7 @@ function Navbar() {
 
   const navLinks = [
     { to: "/", label: "Trang chủ", icon: Home },
-    { to: "/roadmap", label: "Lộ trình", icon: BookOpen },
+    { to: "/roadmap", label: "Lịch học", icon: CalendarDays },
     { to: "/progress", label: "Tiến độ", icon: ChartNoAxesColumnIncreasing },
   ];
 
@@ -440,7 +440,7 @@ function Navbar() {
           </div>
 
           <Link to="/roadmap" className="site-nav-cta hidden sm:inline-flex">
-            Xem lộ trình <span>→</span>
+            Xem lịch học <span>→</span>
           </Link>
 
           {/* Mobile Menu Button */}
