@@ -14,11 +14,10 @@ const videoScheduleSchema = new mongoose.Schema(
       trim: true,
       maxlength: 140,
     },
-    day: {
-      type: Number,
+    date: {
+      type: String,
       required: true,
-      min: 1,
-      max: 7,
+      match: /^\d{4}-\d{2}-\d{2}$/,
     },
     time: {
       type: String,
@@ -40,6 +39,6 @@ const videoScheduleSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-videoScheduleSchema.index({ user: 1, day: 1, time: 1 });
+videoScheduleSchema.index({ user: 1, date: 1, time: 1 });
 
 export default mongoose.model("VideoSchedule", videoScheduleSchema);

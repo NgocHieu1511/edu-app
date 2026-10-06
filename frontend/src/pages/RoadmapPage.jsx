@@ -17,21 +17,27 @@ import {
   updateVideoSchedule,
 } from "../api/videoScheduleApi";
 
-const WEEKDAYS = [
-  { value: 1, label: "Thứ Hai", shortLabel: "T2" },
-  { value: 2, label: "Thứ Ba", shortLabel: "T3" },
-  { value: 3, label: "Thứ Tư", shortLabel: "T4" },
-  { value: 4, label: "Thứ Năm", shortLabel: "T5" },
-  { value: 5, label: "Thứ Sáu", shortLabel: "T6" },
-  { value: 6, label: "Thứ Bảy", shortLabel: "T7" },
-  { value: 7, label: "Chủ Nhật", shortLabel: "CN" },
-];
-
 const PLATFORMS = ["YouTube", "TikTok", "Facebook", "Instagram", "Khác"];
+
+const getToday = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const formatScheduleDate = (date) =>
+  new Date(`${date}T12:00:00`).toLocaleDateString("vi-VN", {
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 
 const createEmptyForm = () => ({
   title: "",
-  day: "1",
+  date: getToday(),
   time: "19:00",
   platform: "YouTube",
   note: "",
@@ -82,15 +88,19 @@ function RoadmapPage() {
     };
   }, [navigate, user]);
 
-  const scheduledDays = useMemo(
-    () => new Set(schedule.map((item) => Number(item.day))).size,
+  const scheduledDates = useMemo(
+    () => new Set(schedule.map((item) => item.date)).size,
     [schedule],
   );
 
-  const itemsByDay = useMemo(() => {
-    const grouped = new Map(WEEKDAYS.map((day) => [day.value, []]));
-    schedule.forEach((item) => grouped.get(Number(item.day)).push(item));
-    grouped.forEach((items) => items.sort((first, second) => first.time.localeCompare(second.time)));
+  const scheduleByDate = useMemo(() => {
+    const grouped = new Map();
+    [...schedule]
+      .sort((first, second) => first.date.localeCompare(second.date) || first.time.localeCompare(second.time))
+      .forEach((item) => {
+        if (!grouped.has(item.date)) grouped.set(item.date, []);
+        grouped.get(item.date).push(item);
+      });
     return grouped;
   }, [schedule]);
 
@@ -109,7 +119,7 @@ function RoadmapPage() {
 
     const data = {
       title,
-      day: Number(form.day),
+      date: form.date,
       time: form.time,
       platform: form.platform,
       note: form.note.trim(),
@@ -136,7 +146,7 @@ function RoadmapPage() {
   const handleEdit = (item) => {
     setForm({
       title: item.title,
-      day: String(item.day),
+      date: item.date,
       time: item.time,
       platform: item.platform,
       note: item.note,
@@ -167,20 +177,20 @@ function RoadmapPage() {
         <div className="weekly-schedule-shell">
           <p className="weekly-schedule-eyebrow">
             <CalendarDays size={15} />
-            KẾ HOẠCH HẰNG TUẦN
+            LỊCH ĐĂNG VIDEO
           </p>
           <div className="weekly-schedule-heading">
             <div>
               <h1>Lịch học <span>& lịch đăng video</span></h1>
-              <p>Sắp xếp thời gian đăng video cố định trong tuần và theo dõi kế hoạch của bạn.</p>
+              <p>Lên lịch đăng video vào ngày và giờ cụ thể, rồi quản lý các lịch đã lưu.</p>
             </div>
             <div className="weekly-schedule-stats" aria-label="Tổng quan lịch đăng">
               <div>
-                <strong>{schedule.length}</strong>
+                <strong>{scheduledDates}</strong>
                 <span>Lịch đăng</span>
               </div>
               <div>
-                <strong>{scheduledDays}/7</strong>
+                <strong>{scheduledDates}</strong>
                 <span>Ngày có lịch</span>
               </div>
             </div>
@@ -194,7 +204,7 @@ function RoadmapPage() {
             <div className="schedule-heading-icon"><Clapperboard size={19} /></div>
             <div>
               <h2>{editingId ? "Chỉnh sửa lịch đăng" : "Thêm lịch đăng video"}</h2>
-              <p>Lịch sẽ lặp lại vào ngày và giờ đã chọn mỗi tuần.</p>
+              <p>Chọn chính xác ngày và giờ bạn muốn đăng video.</p>
             </div>
           </div>
 
@@ -214,16 +224,14 @@ function RoadmapPage() {
               />
             </div>
             <div className="schedule-field">
-              <label htmlFor="schedule-day">Ngày đăng</label>
-              <select
-                id="schedule-day"
-                value={form.day}
-                onChange={(event) => setForm({ ...form, day: event.target.value })}
-              >
-                {WEEKDAYS.map((day) => (
-                  <option key={day.value} value={day.value}>{day.label}</option>
-                ))}
-              </select>
+              <label htmlFor="schedule-date">Ngày đăng</label>
+              <input
+                id="schedule-date"
+                type="date"
+                value={form.date}
+                onChange={(event) => setForm({ ...form, date: event.target.value })}
+                required
+              />
             </div>
             <div className="schedule-field">
               <label htmlFor="schedule-time">Giờ đăng</label>
@@ -272,26 +280,24 @@ function RoadmapPage() {
           </form>
         </section>
 
-        <section className="weekly-calendar" aria-label="Lịch đăng video trong tuần">
+        <section className="weekly-calendar" aria-label="Lịch đăng video">
           <div className="schedule-calendar-heading">
             <div>
-              <span>LỊCH CỐ ĐỊNH</span>
-              <h2>Kế hoạch trong tuần</h2>
+              <span>LỊCH CỤ THỂ</span>
+              <h2>Kế hoạch đăng video</h2>
             </div>
-            <span className="schedule-timezone">Lặp lại hằng tuần</span>
+            <span className="schedule-timezone">Theo ngày đã chọn</span>
           </div>
 
           {loading ? (
             <div className="weekly-calendar-empty">Đang tải lịch từ cơ sở dữ liệu...</div>
           ) : (
-          <div className="weekly-calendar-grid">
-            {WEEKDAYS.map((day) => {
-              const dayItems = itemsByDay.get(day.value);
-              return (
-                <article className="weekly-day-column" key={day.value}>
+            <div className="weekly-calendar-grid">
+              {[...scheduleByDate.entries()].map(([date, dayItems]) => (
+                <article className="weekly-day-column" key={date}>
                   <header className="weekly-day-header">
-                    <span className="weekly-day-short">{day.shortLabel}</span>
-                    <h3>{day.label}</h3>
+                    <CalendarDays size={16} className="weekly-day-date-icon" />
+                    <h3>{formatScheduleDate(date)}</h3>
                     <span className="weekly-day-count">{dayItems.length}</span>
                   </header>
 
@@ -330,9 +336,8 @@ function RoadmapPage() {
                     <p className="weekly-day-empty">Chưa có lịch</p>
                   )}
                 </article>
-              );
-            })}
-          </div>
+              ))}
+            </div>
           )}
 
           {!loading && schedule.length === 0 && (

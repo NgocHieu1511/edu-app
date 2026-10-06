@@ -1285,16 +1285,16 @@
 
 .weekly-calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .weekly-day-column {
   min-width: 0;
-  min-height: 190px;
+  min-height: 120px;
   border-right: 1px solid #edf1f0;
 }
 
-.weekly-day-column:last-child {
+.weekly-day-column:nth-child(3n) {
   border-right: 0;
 }
 
@@ -1308,26 +1308,17 @@
   background: #fbfdfc;
 }
 
-.weekly-day-short {
-  display: grid;
-  width: 27px;
-  height: 27px;
+.weekly-day-date-icon {
   flex: 0 0 auto;
-  place-items: center;
-  border-radius: 8px;
-  background: #eaf7f3;
   color: #1a8173;
-  font-size: 10px;
-  font-weight: 800;
 }
 
 .weekly-day-header h3 {
-  overflow: hidden;
+  overflow-wrap: anywhere;
   margin: 0;
   color: #3d5653;
   font-size: 11px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.4;
 }
 
 .weekly-day-count {
@@ -1442,14 +1433,18 @@
 
 @media (max-width: 1050px) {
   .weekly-calendar-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .weekly-day-column:nth-child(4) {
+  .weekly-day-column:nth-child(3n) {
+    border-right: 1px solid #edf1f0;
+  }
+
+  .weekly-day-column:nth-child(even) {
     border-right: 0;
   }
 
-  .weekly-day-column:nth-child(n + 5) {
+  .weekly-day-column:nth-child(n + 3) {
     border-top: 1px solid #edf1f0;
   }
 }
@@ -1481,16 +1476,8 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .weekly-day-column:nth-child(4) {
-    border-right: 1px solid #edf1f0;
-  }
-
   .weekly-day-column:nth-child(even) {
     border-right: 0;
-  }
-
-  .weekly-day-column:nth-child(n + 3) {
-    border-top: 1px solid #edf1f0;
   }
 }
 

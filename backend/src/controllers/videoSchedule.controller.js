@@ -3,19 +3,23 @@ import VideoSchedule from "../models/videoSchedule.model.js";
 
 const getScheduleFields = (body) => ({
   title: body.title,
-  day: body.day,
+  date: body.date,
   time: body.time,
   platform: body.platform,
   note: body.note ?? "",
 });
 
-const validateScheduleFields = ({ title, day, time, platform, note }) =>
+const isValidDate = (date) => {
+  if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+  const parsedDate = new Date(`${date}T00:00:00.000Z`);
+  return !Number.isNaN(parsedDate.getTime()) && parsedDate.toISOString().slice(0, 10) === date;
+};
+
+const validateScheduleFields = ({ title, date, time, platform, note }) =>
   typeof title === "string" &&
   title.trim().length > 0 &&
   title.trim().length <= 140 &&
-  Number.isInteger(Number(day)) &&
-  Number(day) >= 1 &&
-  Number(day) <= 7 &&
+  isValidDate(date) &&
   typeof time === "string" &&
   /^([01]\d|2[0-3]):[0-5]\d$/.test(time) &&
   ["YouTube", "TikTok", "Facebook", "Instagram", "Khác"].includes(platform) &&
@@ -26,8 +30,11 @@ const isValidId = (id) => mongoose.isValidObjectId(id);
 
 export const getMyVideoSchedule = async (req, res) => {
   try {
-    const items = await VideoSchedule.find({ user: req.user.id })
-      .sort({ day: 1, time: 1 })
+    const items = await VideoSchedule.find({
+      user: req.user.id,
+      date: { $type: "string" },
+    })
+      .sort({ date: 1, time: 1 })
       .lean();
 
     res.status(200).json({ success: true, items });
